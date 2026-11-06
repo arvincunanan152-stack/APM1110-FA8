@@ -1,10 +1,11 @@
 # APM1110-FA8
 
 **Course:** APM1110: Probability and Probability Distributions
-**Assessment:** Formative Assessment 8 (30 points)
-**Author:** Arvin
 
-This repository has my solutions to Formative Assessment 8. I solved each problem by hand with full steps, and I used R to check my answers.
+**Assessment:** Formative Assessment 8 
+
+
+This repository has my solutions to Formative Assessment 8.
 
 ## Files
 
