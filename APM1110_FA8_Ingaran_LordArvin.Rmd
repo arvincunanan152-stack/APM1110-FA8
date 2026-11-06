@@ -1,0 +1,281 @@
+---
+title: "Probability & Probability Distribution"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+date: ''
+---
+# Formative Assessment 8
+
+**Name:** INGARAN, LORD ARVIN C.
+
+**Section:** APM110 - SECTION 2
+
+**Github Link:** https://github.com/arvincunanan152-stack/APM1110-FA8.git
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Problem 1
+
+An urn has 10 red, 8 black, and 7 green balls, so there are 25 balls in total. One color is chosen at random, so each color has probability $\frac{1}{3}$. Then 4 balls are drawn. $X$ is the number of the 4 balls that match the chosen color.
+
+## (a) Find $P(X = 0)$
+
+I used the law of total probability and conditioned on the chosen color. The total number of ways to pick 4 balls is
+
+$$\binom{25}{4} = 12650.$$
+
+$X = 0$ means all 4 balls come from the balls that are not the chosen color.
+
+- Red chosen: 15 non-red balls, so $P(X=0 \mid \text{red}) = \dfrac{\binom{15}{4}}{\binom{25}{4}} = \dfrac{1365}{12650}$
+- Black chosen: 17 non-black balls, so $P(X=0 \mid \text{black}) = \dfrac{\binom{17}{4}}{\binom{25}{4}} = \dfrac{2380}{12650}$
+- Green chosen: 18 non-green balls, so $P(X=0 \mid \text{green}) = \dfrac{\binom{18}{4}}{\binom{25}{4}} = \dfrac{3060}{12650}$
+
+Putting these together:
+
+$$P(X=0) = \frac{1}{3}\left(\frac{1365}{12650} + \frac{2380}{12650} + \frac{3060}{12650}\right) = \frac{1}{3}\cdot\frac{6805}{12650} = \frac{6805}{37950} \approx 0.1793$$
+
+```{r p1a}
+total <- choose(25, 4)
+p_x0 <- (1/3) * (choose(15, 4) + choose(17, 4) + choose(18, 4)) / total
+round(p_x0, 4)
+```
+
+**Answer:** $P(X = 0) \approx 0.1793$
+
+## (b) Find $P(X_i = 1)$ for $i = 1, 2, 3, 4$
+
+Here $X_i = 1$ if the $i$th ball picked is the chosen color. Every ball in the urn is equally likely to be the $i$th pick, so once the color is known, $P(X_i = 1)$ is that color's share of the urn:
+
+$$P(X_i = 1 \mid \text{red}) = \frac{10}{25}, \quad P(X_i = 1 \mid \text{black}) = \frac{8}{25}, \quad P(X_i = 1 \mid \text{green}) = \frac{7}{25}.$$
+
+By the law of total probability:
+
+$$P(X_i = 1) = \frac{1}{3}\cdot\frac{10}{25} + \frac{1}{3}\cdot\frac{8}{25} + \frac{1}{3}\cdot\frac{7}{25} = \frac{1}{3}\cdot\frac{25}{25} = \frac{1}{3}.$$
+
+```{r p1b}
+p_xi <- (1/3) * (10/25 + 8/25 + 7/25)
+round(p_xi, 4)
+```
+
+**Answer:** $P(X_i = 1) = \frac{1}{3} \approx 0.3333$ for $i = 1, 2, 3, 4$
+
+## (c) Find $E[X]$
+
+The count of matching balls is the sum of the indicators:
+
+$$X = X_1 + X_2 + X_3 + X_4.$$
+
+Each $X_i$ is an indicator, so $E[X_i] = P(X_i = 1) = \frac{1}{3}$. By linearity of expectation:
+
+$$E[X] = E[X_1] + E[X_2] + E[X_3] + E[X_4] = 4\cdot\frac{1}{3} = \frac{4}{3}.$$
+
+```{r p1c}
+round(4 * p_xi, 4)
+```
+
+**Answer:** $E[X] = \frac{4}{3} \approx 1.3333$
+
+# Problem 2
+
+The Yule-Simon distribution has
+
+$$P(X = n) = \frac{4}{n(n+1)(n+2)}, \quad n \ge 1.$$
+
+## (a) Show that the probabilities sum to 1
+
+First, every term is positive, so $P(X = n) \ge 0$. Next I used the hint:
+
+$$\frac{1}{n(n+1)(n+2)} = \frac{1}{2}\left(\frac{1}{n(n+1)} - \frac{1}{(n+1)(n+2)}\right).$$
+
+Check using $\frac{k}{n(n+k)} = \frac{1}{n} - \frac{1}{n+k}$ with $k = 2$ on the left side. Multiplying by 4 gives
+
+$$P(X = n) = 2\left(\frac{1}{n(n+1)} - \frac{1}{(n+1)(n+2)}\right).$$
+
+Let $a_n = \dfrac{1}{n(n+1)}$. Then $P(X = n) = 2(a_n - a_{n+1})$, so the partial sum telescopes:
+
+$$\sum_{n=1}^{N} P(X = n) = 2(a_1 - a_{N+1}) = 2\left(\frac{1}{2} - \frac{1}{(N+1)(N+2)}\right).$$
+
+Letting $N \to \infty$, the last term goes to 0:
+
+$$\sum_{n=1}^{\infty} P(X = n) = 2\cdot\frac{1}{2} = 1.$$
+
+So this is a valid PMF. Numeric check:
+
+```{r p2a}
+n <- 1:1e6
+pmf <- 4 / (n * (n + 1) * (n + 2))
+round(sum(pmf), 4)
+```
+
+## (b) Show that $E[X] = 2$
+
+$$E[X] = \sum_{n=1}^{\infty} n\cdot\frac{4}{n(n+1)(n+2)} = 4\sum_{n=1}^{\infty}\frac{1}{(n+1)(n+2)}.$$
+
+Using $\frac{1}{(n+1)(n+2)} = \frac{1}{n+1} - \frac{1}{n+2}$, the partial sum telescopes:
+
+$$\sum_{n=1}^{N}\left(\frac{1}{n+1} - \frac{1}{n+2}\right) = \frac{1}{2} - \frac{1}{N+2} \to \frac{1}{2}.$$
+
+Therefore
+
+$$E[X] = 4\cdot\frac{1}{2} = 2.$$
+
+```{r p2b}
+round(sum(n * pmf), 4)
+```
+
+## (c) Show that $E[X^2] = \infty$
+
+$$E[X^2] = \sum_{n=1}^{\infty} n^2\cdot\frac{4}{n(n+1)(n+2)} = 4\sum_{n=1}^{\infty}\frac{n}{(n+1)(n+2)}.$$
+
+For $n \ge 1$ we have $n + 1 \le 2n$ and $n + 2 \le 3n$, so $(n+1)(n+2) \le 6n^2$. This gives
+
+$$\frac{n}{(n+1)(n+2)} \ge \frac{n}{6n^2} = \frac{1}{6n}.$$
+
+So
+
+$$E[X^2] \ge \frac{4}{6}\sum_{n=1}^{\infty}\frac{1}{n}.$$
+
+The harmonic series $\sum \frac{1}{n}$ diverges, so by the comparison test $E[X^2] = \infty$.
+
+In R, the partial sums just keep growing:
+
+```{r p2c}
+partial <- cumsum(n^2 * pmf)
+data.frame(
+  terms = c(10, 1000, 1e5, 1e6),
+  partial_sum = round(partial[c(10, 1000, 1e5, 1e6)], 4)
+)
+```
+
+# Problem 3
+
+The density is $f(x) = a + bx^2$ for $0 \le x \le 1$ (and 0 otherwise), and $E[X] = \frac{3}{5}$.
+
+**Equation 1 (total probability is 1):**
+
+$$\int_0^1 (a + bx^2)\,dx = \left[ax + \frac{bx^3}{3}\right]_0^1 = a + \frac{b}{3} = 1.$$
+
+**Equation 2 (the mean):**
+
+$$E[X] = \int_0^1 x(a + bx^2)\,dx = \left[\frac{ax^2}{2} + \frac{bx^4}{4}\right]_0^1 = \frac{a}{2} + \frac{b}{4} = \frac{3}{5}.$$
+
+**Solving:** From Equation 1, $a = 1 - \frac{b}{3}$. Substituting into Equation 2:
+
+$$\frac{1}{2}\left(1 - \frac{b}{3}\right) + \frac{b}{4} = \frac{3}{5}$$
+
+$$\frac{1}{2} - \frac{b}{6} + \frac{b}{4} = \frac{3}{5}$$
+
+$$\frac{b}{12} = \frac{3}{5} - \frac{1}{2} = \frac{1}{10}$$
+
+$$b = \frac{12}{10} = \frac{6}{5}.$$
+
+Then
+
+$$a = 1 - \frac{1}{3}\cdot\frac{6}{5} = 1 - \frac{2}{5} = \frac{3}{5}.$$
+
+I solved the same system in R to check:
+
+```{r p3}
+A <- matrix(c(1, 1/3,
+              1/2, 1/4), nrow = 2, byrow = TRUE)
+rhs <- c(1, 3/5)
+sol <- solve(A, rhs)
+names(sol) <- c("a", "b")
+round(sol, 4)
+
+f <- function(x) sol["a"] + sol["b"] * x^2
+round(integrate(f, 0, 1)$value, 4)                    # should be 1
+round(integrate(function(x) x * f(x), 0, 1)$value, 4) # should be 0.6
+```
+
+**Answer:** $a = \frac{3}{5} = 0.6000$ and $b = \frac{6}{5} = 1.2000$
+
+# Problem 4
+
+$X$ has mean $\mu$ and variance $\sigma^2$. Let
+
+$$Y = \frac{X - \mu}{\sigma} = \frac{1}{\sigma}X - \frac{\mu}{\sigma}.$$
+
+**Expected value.** Using $E[aX + c] = aE[X] + c$:
+
+$$E[Y] = \frac{1}{\sigma}E[X] - \frac{\mu}{\sigma} = \frac{\mu}{\sigma} - \frac{\mu}{\sigma} = 0.$$
+
+**Variance.** Using $\text{Var}(aX + c) = a^2\,\text{Var}(X)$ (adding a constant does not change variance):
+
+$$\text{Var}(Y) = \left(\frac{1}{\sigma}\right)^2 \text{Var}(X) = \frac{\sigma^2}{\sigma^2} = 1.$$
+
+As a check, I tried $\mu = 10$ and $\sigma = 3$ with a large random sample:
+
+```{r p4}
+set.seed(1110)
+x <- rnorm(100000, mean = 10, sd = 3)
+y <- (x - 10) / 3
+round(mean(y), 4)  # close to 0
+round(var(y), 4)   # close to 1
+```
+
+**Answer:** $E[Y] = 0$ and $\text{Var}(Y) = 1$
+
+# Problem 5
+
+$X \sim \text{Poisson}(2)$ and $Y \sim \text{Poisson}(3)$ are independent, and $W = X + Y$.
+
+## (a) MGF of $W$
+
+For $N \sim \text{Poisson}(\lambda)$, the MGF is
+
+$$M_N(t) = E[e^{tN}] = \sum_{k=0}^{\infty} e^{tk}\frac{e^{-\lambda}\lambda^k}{k!} = e^{-\lambda}\sum_{k=0}^{\infty}\frac{(\lambda e^t)^k}{k!} = e^{-\lambda}e^{\lambda e^t} = e^{\lambda(e^t - 1)}.$$
+
+Since $X$ and $Y$ are independent, $E[e^{t(X+Y)}] = E[e^{tX}]\,E[e^{tY}]$, so
+
+$$M_W(t) = M_X(t)\,M_Y(t) = e^{2(e^t - 1)}\cdot e^{3(e^t - 1)} = e^{5(e^t - 1)}.$$
+
+## (b) Distribution of $W$
+
+$M_W(t) = e^{5(e^t - 1)}$ has the same form as the Poisson MGF with $\lambda = 5$. By the uniqueness property of MGFs (an MGF that exists near $t = 0$ determines the distribution), 
+
+$$W \sim \text{Poisson}(5).$$
+
+## (c) $E[W]$ and $E[W^2]$
+
+I differentiate $M_W(t)$ and evaluate at $t = 0$.
+
+First derivative, using the chain rule:
+
+$$M_W'(t) = 5e^t\, e^{5(e^t - 1)} = 5e^t M_W(t).$$
+
+At $t = 0$: $M_W(0) = e^0 = 1$, so
+
+$$E[W] = M_W'(0) = 5\cdot 1\cdot 1 = 5.$$
+
+Second derivative, using the product rule:
+
+$$M_W''(t) = 5e^t M_W(t) + 5e^t M_W'(t) = 5e^t M_W(t) + 25e^{2t} M_W(t).$$
+
+At $t = 0$:
+
+$$E[W^2] = M_W''(0) = 5 + 25 = 30.$$
+
+I also used R to differentiate the MGF symbolically:
+
+```{r p5c}
+M_W <- expression(exp(5 * (exp(t) - 1)))
+d1 <- D(M_W, "t")
+d2 <- D(d1, "t")
+
+e_w  <- eval(d1, list(t = 0))
+e_w2 <- eval(d2, list(t = 0))
+
+round(e_w, 4)
+round(e_w2, 4)
+round(e_w2 - e_w^2, 4)  # variance
+```
+
+As a final check, $\text{Var}(W) = E[W^2] - (E[W])^2 = 30 - 25 = 5$, which matches the Poisson variance $\lambda = 5$.
+
+**Answer:** $M_W(t) = e^{5(e^t - 1)}$, $W \sim \text{Poisson}(5)$, $E[W] = 5$, $E[W^2] = 30$
